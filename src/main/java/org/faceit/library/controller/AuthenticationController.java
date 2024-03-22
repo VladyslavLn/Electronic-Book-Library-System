@@ -1,9 +1,9 @@
 package org.faceit.library.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.faceit.library.dto.JwtAuthenticationResponse;
-import org.faceit.library.dto.SignInRequest;
-import org.faceit.library.dto.SignUpRequest;
+import org.faceit.library.dto.request.SignInRequest;
+import org.faceit.library.dto.request.SignUpRequest;
+import org.faceit.library.dto.response.JwtAuthenticationResponse;
 import org.faceit.library.service.AuthenticationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

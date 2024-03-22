@@ -1,4 +1,4 @@
-package org.faceit.library.dto;
+package org.faceit.library.dto.request;
 
 import lombok.Data;
 
