@@ -1,14 +1,12 @@
 package org.faceit.library.service;
 
 import lombok.RequiredArgsConstructor;
+import org.faceit.library.db.entity.Book;
 import org.faceit.library.db.repository.BookRepository;
 import org.faceit.library.service.exception.BookNotFoundException;
-import org.faceit.library.service.exception.S3Exception;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,32 +15,29 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
 
     @Override
-    public List<String> getDownloadedBooksByUserId(Integer userId) {
-        return bookRepository.getDownloadedBooksByUserId(userId);
+    public Book updateBook(Book book) {
+        return bookRepository.save(book);
     }
 
     @Override
-    public void uploadBook(Integer userId, MultipartFile file) {
-        try {
-            s3Service.putObject(file.getOriginalFilename(), file.getBytes());
-            bookRepository.saveFilesMetadata(userId, file.getOriginalFilename());
-        } catch (Exception e) {
-            throw new S3Exception("");
-        }
+    public Book getBook(Integer bookId) {
+        return bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
     }
 
     @Override
-    public byte[] getBook(Integer userId, String fileKey) {
-        try {
-            return s3Service.getObject(fileKey);
-        } catch (NoSuchKeyException e) {
-            throw new BookNotFoundException(fileKey);
-        }
+    public void deleteBook(Integer bookId) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        bookRepository.deleteById(bookId);
+        s3Service.deleteObject(book.getFileKey());
     }
 
     @Override
-    public void deleteBook(Integer userId, String fileKey) {
-        s3Service.deleteObject(fileKey);
-        bookRepository.deleteFilesMetadata(userId, fileKey);
+    public Book createBook(Book book) {
+        return bookRepository.save(book);
+    }
+
+    @Override
+    public Page<Book> getAllBooks(Pageable pageable) {
+        return bookRepository.findAll(pageable);
     }
 }

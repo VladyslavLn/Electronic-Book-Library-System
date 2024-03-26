@@ -1,9 +1,17 @@
 package org.faceit.library.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.faceit.library.db.entity.Book;
+import org.faceit.library.dto.request.BookRequestDTO;
+import org.faceit.library.dto.response.BookResponseDTO;
+import org.faceit.library.mapper.BookMapper;
 import org.faceit.library.service.BookService;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,42 +24,43 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BooksController {
     private final BookService bookService;
+    private final BookMapper bookMapper;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<String>> getAvailableBooksForUser(@PathVariable Integer userId) {
-        List<String> availableBooksList = bookService.getDownloadedBooksByUserId(userId);
-        return ResponseEntity.ok(availableBooksList);
+    @PostMapping
+    public ResponseEntity<BookResponseDTO> createBook(@RequestBody BookRequestDTO bookRequestDTO) {
+        return new ResponseEntity<>(
+                bookMapper.toResponseDTO(
+                        bookService.createBook(bookMapper.toEntity(bookRequestDTO))
+                ), HttpStatus.CREATED
+        );
     }
 
-    @PostMapping("/{userId}/upload")
-    public ResponseEntity<String> uploadBook(@PathVariable Integer userId, @RequestPart MultipartFile file) {
-        bookService.uploadBook(userId, file);
-        return ResponseEntity.ok().build();
+    @GetMapping
+    public ResponseEntity<Page<BookResponseDTO>> getAllBooks(@PageableDefault Pageable pageable) {
+        Page<BookResponseDTO> books = bookService.getAllBooks(pageable).map(bookMapper::toResponseDTO);
+        return ResponseEntity.ok(books);
     }
 
-    @GetMapping("/{userId}/download")
-    public ResponseEntity<Object> downloadBook(@PathVariable Integer userId, @RequestParam String fileKey) {
-        byte[] data = bookService.getBook(userId, fileKey);
-        String contentType;
-        if (fileKey.endsWith(".pdf")) {
-            contentType = "application/pdf";
-        } else if (fileKey.endsWith(".epub")) {
-            contentType = "application/epub+zip";
-        } else if (fileKey.endsWith(".fb2")) {
-            contentType = "application/x-fictionbook+xml";
-        } else {
-            throw new IllegalStateException("Unsupported file type.");
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileKey + "\"")
-                .body(new ByteArrayResource(data));
+    @PutMapping("/{bookId}")
+    public ResponseEntity<BookResponseDTO> updateBook(@RequestBody BookRequestDTO bookRequestDTO,
+                                                      @PathVariable Integer bookId) {
+        Book book = bookMapper.toEntity(bookRequestDTO);
+        book.setId(bookId);
+        return new ResponseEntity<>(
+                bookMapper.toResponseDTO(
+                        bookService.updateBook(book)), HttpStatus.CREATED
+        );
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Integer userId, @RequestParam String fileKey) {
-        bookService.deleteBook(userId, fileKey);
+    @GetMapping("/{bookId}")
+    public ResponseEntity<BookResponseDTO> getBookById(@PathVariable Integer bookId) {
+        Book book = bookService.getBook(bookId);
+        return ResponseEntity.ok(bookMapper.toResponseDTO(book));
+    }
+
+    @DeleteMapping("/{bookId}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Integer bookId) {
+        bookService.deleteBook(bookId);
         return ResponseEntity.ok().build();
     }
 }

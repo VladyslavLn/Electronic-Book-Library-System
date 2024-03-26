@@ -1,11 +1,12 @@
 package org.faceit.library.service;
 
-import org.faceit.library.dto.request.SignInRequest;
-import org.faceit.library.dto.request.SignUpRequest;
-import org.faceit.library.dto.response.JwtAuthenticationResponse;
+import org.faceit.library.dto.request.SignInRequestDTO;
+import org.faceit.library.dto.request.SignUpRequestDTO;
+import org.faceit.library.dto.response.JwtAuthenticationResponseDTO;
+import org.faceit.library.dto.response.SignUpResponseDTO;
 
 public interface AuthenticationService {
-    JwtAuthenticationResponse signUp(SignUpRequest request);
+    SignUpResponseDTO register(SignUpRequestDTO request);
 
-    JwtAuthenticationResponse signIn(SignInRequest request);
+    JwtAuthenticationResponseDTO login(SignInRequestDTO request);
 }

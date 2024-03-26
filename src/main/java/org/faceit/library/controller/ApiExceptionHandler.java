@@ -2,10 +2,12 @@ package org.faceit.library.controller;
 
 import org.faceit.library.service.exception.BookNotFoundException;
 import org.faceit.library.service.exception.S3Exception;
+import org.faceit.library.service.exception.UserAlreadyExistException;
 import org.faceit.library.service.exception.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,7 +32,10 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = {
-            S3Exception.class
+            S3Exception.class,
+            IllegalArgumentException.class,
+            AuthenticationException.class,
+            UserAlreadyExistException.class
     })
     public ResponseEntity<Object> handleBadRequest(Exception exception, WebRequest request) {
         Map<String, String> body = new HashMap<>();

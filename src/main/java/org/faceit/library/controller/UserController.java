@@ -22,13 +22,13 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Page<UserResponseDTO>> getAllUsers(@PageableDefault Pageable pageable) {
         Page<User> users = userService.getAllUsers(pageable);
-        return ResponseEntity.ok(users.map(userMapper::toResponseDto));
+        return ResponseEntity.ok(users.map(userMapper::toResponseDTO));
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponseDTO> getUserByUserId(@PathVariable Integer userId) {
         User user = userService.getUserById(userId);
-        return ResponseEntity.ok(userMapper.toResponseDto(user));
+        return ResponseEntity.ok(userMapper.toResponseDTO(user));
     }
 
     @PutMapping("/{userId}")
@@ -36,7 +36,7 @@ public class UserController {
         User user = userMapper.toEntity(userRequestDTO);
         user.setId(userId);
         User savedUser = userService.saveUser(user);
-        return ResponseEntity.ok(userMapper.toResponseDto(savedUser));
+        return ResponseEntity.ok(userMapper.toResponseDTO(savedUser));
     }
 
     @DeleteMapping("/{userId}")

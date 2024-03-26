@@ -1,15 +1,17 @@
 package org.faceit.library.service;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
+import org.faceit.library.db.entity.Book;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BookService {
-    List<String> getDownloadedBooksByUserId(Integer userId);
+    Book createBook(Book book);
 
-    void uploadBook(Integer userId, MultipartFile file);
+    Book getBook(Integer bookId);
 
-    byte[] getBook(Integer userId, String fileKey);
+    Page<Book> getAllBooks(Pageable pageable);
 
-    void deleteBook(Integer userId, String fileKey);
+    void deleteBook(Integer bookId);
+
+    Book updateBook(Book entity);
 }

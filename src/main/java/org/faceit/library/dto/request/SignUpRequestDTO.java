@@ -3,7 +3,7 @@ package org.faceit.library.dto.request;
 import lombok.Data;
 
 @Data
-public class SignUpRequest {
+public class SignUpRequestDTO {
     private String firstName;
     private String lastName;
     private String email;
