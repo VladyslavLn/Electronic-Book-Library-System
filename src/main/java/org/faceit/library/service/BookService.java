@@ -1,8 +1,10 @@
 package org.faceit.library.service;
 
 import org.faceit.library.db.entity.Book;
+import org.faceit.library.model.BookFileMetadata;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface BookService {
     Book createBook(Book book);
@@ -14,4 +16,8 @@ public interface BookService {
     void deleteBook(Integer bookId);
 
     Book updateBook(Book entity);
+
+    BookFileMetadata downloadBookFile(Integer bookId);
+
+    void uploadBookFile(Integer bookId, MultipartFile file);
 }
