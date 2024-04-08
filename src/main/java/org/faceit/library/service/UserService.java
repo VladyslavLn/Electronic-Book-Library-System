@@ -12,6 +12,8 @@ public interface UserService {
 
     User getUserById(Integer userId);
 
+    User getUserByEmail(String email);
+
     void deleteUserById(Integer userId);
 
     User saveUser(User user);

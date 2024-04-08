@@ -1,10 +1,19 @@
 package org.faceit.library.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.faceit.library.aop.AuthenticatedUsername;
 import org.faceit.library.db.entity.Book;
+import org.faceit.library.db.entity.BookRating;
+import org.faceit.library.db.entity.BookReview;
+import org.faceit.library.dto.request.BookRatingRequestDTO;
 import org.faceit.library.dto.request.BookRequestDTO;
+import org.faceit.library.dto.request.BookReviewRequestDTO;
+import org.faceit.library.dto.response.BookRatingResponseDTO;
 import org.faceit.library.dto.response.BookResponseDTO;
+import org.faceit.library.dto.response.BookReviewResponseDTO;
 import org.faceit.library.mapper.BookMapper;
+import org.faceit.library.mapper.BookRatingMapper;
+import org.faceit.library.mapper.BookReviewMapper;
 import org.faceit.library.model.BookFileMetadata;
 import org.faceit.library.service.BookService;
 import org.springframework.core.io.ByteArrayResource;
@@ -25,6 +34,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class BooksController {
     private final BookService bookService;
     private final BookMapper bookMapper;
+    private final BookReviewMapper bookReviewMapper;
+    private final BookRatingMapper bookRatingMapper;
 
     @PostMapping
     public ResponseEntity<BookResponseDTO> createBook(@RequestBody BookRequestDTO bookRequestDTO) {
@@ -93,5 +104,20 @@ public class BooksController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .body(new ByteArrayResource(data.getFileData()));
+    }
+
+    @PostMapping("/{bookId}/review")
+    public ResponseEntity<BookReviewResponseDTO> addReviewToBook(@AuthenticatedUsername String username,
+                                                                 @PathVariable Integer bookId,
+                                                                 @RequestBody BookReviewRequestDTO bookReviewRequestDTO) {
+        BookReview bookReview = bookService.addReviewToBook(username, bookId, bookReviewRequestDTO);
+        return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
+    }
+
+    @PostMapping("/{bookId}/rating")
+    public ResponseEntity<BookRatingResponseDTO> addRatingToBook(@AuthenticatedUsername String username, @PathVariable Integer bookId,
+                                                                 @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
+        BookRating bookRating = bookService.addRatingToBook(username, bookId, bookRatingRequestDTO);
+        return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
     }
 }

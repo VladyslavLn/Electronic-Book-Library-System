@@ -1,6 +1,10 @@
 package org.faceit.library.service;
 
 import org.faceit.library.db.entity.Book;
+import org.faceit.library.db.entity.BookRating;
+import org.faceit.library.db.entity.BookReview;
+import org.faceit.library.dto.request.BookRatingRequestDTO;
+import org.faceit.library.dto.request.BookReviewRequestDTO;
 import org.faceit.library.model.BookFileMetadata;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,4 +24,8 @@ public interface BookService {
     BookFileMetadata downloadBookFile(Integer bookId);
 
     void uploadBookFile(Integer bookId, MultipartFile file);
+
+    BookReview addReviewToBook(String username, Integer bookId, BookReviewRequestDTO bookReviewRequestDTO);
+
+    BookRating addRatingToBook(String username, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO);
 }

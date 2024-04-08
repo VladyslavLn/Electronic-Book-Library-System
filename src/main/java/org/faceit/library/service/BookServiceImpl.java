@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.faceit.library.db.entity.Book;
+import org.faceit.library.db.entity.BookRating;
+import org.faceit.library.db.entity.BookReview;
+import org.faceit.library.db.entity.User;
 import org.faceit.library.db.repository.BookRepository;
+import org.faceit.library.dto.request.BookRatingRequestDTO;
+import org.faceit.library.dto.request.BookReviewRequestDTO;
 import org.faceit.library.model.BookFileMetadata;
 import org.faceit.library.service.exception.BookNotFoundException;
 import org.springframework.data.domain.Page;
@@ -16,11 +21,14 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class BookServiceImpl implements BookService {
     private final S3Service s3Service;
     private final BookRepository bookRepository;
+    private final UserService userService;
+    private final BookReviewService bookReviewService;
+    private final BookRatingService bookRatingService;
 
-    @Transactional
     @Override
     public Book updateBook(Book book) {
         return bookRepository.save(book);
@@ -31,7 +39,6 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
     }
 
-    @Transactional
     @Override
     public void deleteBook(Integer bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
@@ -39,7 +46,6 @@ public class BookServiceImpl implements BookService {
         s3Service.deleteObject(book.getFileKey());
     }
 
-    @Transactional
     @Override
     public Book createBook(Book book) {
         return bookRepository.save(book);
@@ -60,7 +66,6 @@ public class BookServiceImpl implements BookService {
         return null;
     }
 
-    @Transactional
     @Override
     public void uploadBookFile(Integer bookId, MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
@@ -72,5 +77,29 @@ public class BookServiceImpl implements BookService {
         } catch (Exception e) {
             log.error("Can't put object to S3 : {}", e.getMessage());
         }
+    }
+
+    @Override
+    public BookReview addReviewToBook(String username, Integer bookId, BookReviewRequestDTO bookReviewRequestDTO) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        User user = userService.getUserByEmail(username);
+        BookReview bookReview = BookReview.builder()
+                .book(book)
+                .user(user)
+                .reviewContent(bookReviewRequestDTO.getContent())
+                .build();
+        return bookReviewService.createReview(bookReview);
+    }
+
+    @Override
+    public BookRating addRatingToBook(String username, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO) {
+        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        User user = userService.getUserByEmail(username);
+        BookRating bookRating = BookRating.builder()
+                .book(book)
+                .user(user)
+                .ratingValue(bookRatingRequestDTO.getRatingValue())
+                .build();
+        return bookRatingService.createBookRating(bookRating);
     }
 }
