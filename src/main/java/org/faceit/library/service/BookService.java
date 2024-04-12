@@ -28,4 +28,12 @@ public interface BookService {
     BookReview addReviewToBook(String username, Integer bookId, BookReviewRequestDTO bookReviewRequestDTO);
 
     BookRating addRatingToBook(String username, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO);
+
+    BookReview updateBookReview(BookReviewRequestDTO bookReviewRequestDTO, Integer bookReviewId);
+
+    BookRating updateBookRating(BookRatingRequestDTO bookRatingRequestDTO, Integer bookReviewId);
+
+    void deleteBookRating(Integer bookId, Integer bookRatingId);
+
+    void deleteBookReview(Integer bookReviewId);
 }

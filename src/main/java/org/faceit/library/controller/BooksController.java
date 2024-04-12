@@ -114,10 +114,38 @@ public class BooksController {
         return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
     }
 
+    @PutMapping("/{bookId}/review/{bookReviewId}")
+    public ResponseEntity<BookReviewResponseDTO> updateBookReview(@PathVariable Integer bookId,
+                                                                  @PathVariable Integer bookReviewId,
+                                                                  @RequestBody BookReviewRequestDTO bookReviewRequestDTO) {
+        BookReview bookReview = bookService.updateBookReview(bookReviewRequestDTO, bookReviewId);
+        return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
+    }
+
     @PostMapping("/{bookId}/rating")
     public ResponseEntity<BookRatingResponseDTO> addRatingToBook(@AuthenticatedUsername String username, @PathVariable Integer bookId,
                                                                  @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
         BookRating bookRating = bookService.addRatingToBook(username, bookId, bookRatingRequestDTO);
         return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
+    }
+
+    @PutMapping("/{bookId}/rating/{bookRatingId}")
+    public ResponseEntity<BookRatingResponseDTO> updateBookRating(@PathVariable Integer bookId,
+                                                                  @PathVariable Integer bookRatingId,
+                                                                  @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
+        BookRating bookRating = bookService.updateBookRating(bookRatingRequestDTO, bookRatingId);
+        return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
+    }
+
+    @DeleteMapping("/{bookId}/rating/{bookRatingId}")
+    public ResponseEntity<Void> deleteBookRating(@PathVariable Integer bookId, @PathVariable Integer bookRatingId) {
+        bookService.deleteBookRating(bookId, bookRatingId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{bookId}/review/{bookReviewId}")
+    public ResponseEntity<Void> deleteBookReview(@PathVariable Integer bookId, @PathVariable Integer bookReviewId) {
+        bookService.deleteBookReview(bookReviewId);
+        return ResponseEntity.ok().build();
     }
 }

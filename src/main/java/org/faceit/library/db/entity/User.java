@@ -25,17 +25,12 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     private String email;
-
     @Column(name = "first_name")
     private String firstName;
-
     @Column(name = "last_name")
     private String lastName;
-
     private String password;
-
     @ManyToMany
     @JoinTable(
             name = "users_roles",
@@ -44,11 +39,9 @@ public class User implements UserDetails {
     )
     @Fetch(value = FetchMode.JOIN)
     private Set<Role> role;
-
     @Column(name = "created_at")
     @CreationTimestamp
     private OffsetDateTime createdAt;
-
     @Column(name = "changed_at")
     @UpdateTimestamp
     private OffsetDateTime changedAt;

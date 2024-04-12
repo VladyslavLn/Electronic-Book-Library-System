@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -43,7 +45,9 @@ public class BookServiceImpl implements BookService {
     public void deleteBook(Integer bookId) {
         Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
         bookRepository.deleteById(bookId);
-        s3Service.deleteObject(book.getFileKey());
+        if (StringUtils.isNotBlank(book.getFileKey())) {
+            s3Service.deleteObject(book.getFileKey());
+        }
     }
 
     @Override
@@ -88,7 +92,7 @@ public class BookServiceImpl implements BookService {
                 .user(user)
                 .reviewContent(bookReviewRequestDTO.getContent())
                 .build();
-        return bookReviewService.createReview(bookReview);
+        return bookReviewService.saveBookReview(bookReview);
     }
 
     @Override
@@ -100,6 +104,59 @@ public class BookServiceImpl implements BookService {
                 .user(user)
                 .ratingValue(bookRatingRequestDTO.getRatingValue())
                 .build();
-        return bookRatingService.createBookRating(bookRating);
+        BookRating bookRatingResult = bookRatingService.saveBookRating(bookRating);
+        book.getRatings().add(bookRating);
+        book.setAvgRating(calculateAverageRating(book.getRatings()));
+        bookRepository.save(book);
+        return bookRatingResult;
+    }
+
+    private double calculateAverageRating(List<BookRating> bookRatings) {
+        return bookRatings.stream()
+                .mapToInt(BookRating::getRatingValue)
+                .average()
+                .orElse(0.0);
+    }
+
+    @Override
+    public BookReview updateBookReview(BookReviewRequestDTO bookReviewRequestDTO, Integer bookReviewId) {
+        BookReview bookReview = bookReviewService.getBookReview(bookReviewId);
+        bookReview.setReviewContent(bookReviewRequestDTO.getContent());
+        return bookReviewService.saveBookReview(bookReview);
+    }
+
+    @Override
+    public BookRating updateBookRating(BookRatingRequestDTO bookRatingRequestDTO, Integer bookReviewId) {
+        BookRating bookRating = bookRatingService.getBookRatingById(bookReviewId);
+        bookRating.setRatingValue(bookRatingRequestDTO.getRatingValue());
+        bookRatingService.saveBookRating(bookRating);
+
+        Book bookRatingBook = bookRating.getBook();
+        List<BookRating> bookRatings = bookRatingBook.getRatings();
+
+        double totalRatingValue = 0;
+        for (BookRating rating : bookRatings) {
+            totalRatingValue += rating.getRatingValue();
+        }
+        double averageRating = totalRatingValue / bookRatings.size();
+
+        bookRatingBook.setAvgRating(averageRating);
+        bookRepository.save(bookRatingBook);
+
+        return bookRating;
+    }
+
+    @Override
+    public void deleteBookRating(Integer bookId, Integer bookRatingId) {
+        Book book = bookRepository.getReferenceById(bookId);
+        bookRatingService.deleteBookRating(bookRatingId);
+        book.getRatings().removeIf(rating -> rating.getId().equals(bookRatingId));
+        book.setAvgRating(calculateAverageRating(book.getRatings()));
+        bookRepository.save(book);
+    }
+
+    @Override
+    public void deleteBookReview(Integer bookReviewId) {
+        bookReviewService.deleteBookReview(bookReviewId);
     }
 }

@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS book_reviews
     id             SERIAL PRIMARY KEY,
     book_id        INT REFERENCES books (id),
     user_id        INT REFERENCES users (id),
-    review_content TEXT
+    review_content TEXT,
+    created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    changed_at     TIMESTAMP WITH TIME ZONE
 );
 
 ALTER TABLE book_reviews
@@ -14,7 +16,9 @@ CREATE TABLE IF NOT EXISTS book_ratings
     id           SERIAL PRIMARY KEY,
     book_id      INT REFERENCES books (id),
     user_id      INT REFERENCES users (id),
-    rating_value DECIMAL(2, 1) CHECK (rating_value >= 0 AND rating_value <= 5)
+    rating_value DECIMAL(2, 1) CHECK (rating_value >= 0 AND rating_value <= 5),
+    created_at   TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    changed_at   TIMESTAMP WITH TIME ZONE
 );
 
 ALTER TABLE book_ratings

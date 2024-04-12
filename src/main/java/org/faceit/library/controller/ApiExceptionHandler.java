@@ -1,5 +1,6 @@
 package org.faceit.library.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.faceit.library.service.exception.BookNotFoundException;
 import org.faceit.library.service.exception.S3Exception;
 import org.faceit.library.service.exception.UserAlreadyExistException;
@@ -22,7 +23,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
             UserNotFoundException.class,
             UsernameNotFoundException.class,
-            BookNotFoundException.class
+            BookNotFoundException.class,
+            EntityNotFoundException.class,
     })
     public ResponseEntity<Object> handleNotFound(Exception exception, WebRequest request) {
         Map<String, String> body = new HashMap<>();

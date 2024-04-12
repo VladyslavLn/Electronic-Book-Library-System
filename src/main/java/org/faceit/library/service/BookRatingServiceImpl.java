@@ -3,8 +3,6 @@ package org.faceit.library.service;
 import lombok.RequiredArgsConstructor;
 import org.faceit.library.db.entity.BookRating;
 import org.faceit.library.db.repository.BookRatingRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,17 +13,7 @@ public class BookRatingServiceImpl implements BookRatingService {
     private final BookRatingRepository bookRatingRepository;
 
     @Override
-    public BookRating createBookRating(BookRating bookRating) {
-        return bookRatingRepository.save(bookRating);
-    }
-
-    @Override
-    public Page<BookRating> getAllBookRatings(Pageable pageable) {
-        return bookRatingRepository.findAll(pageable);
-    }
-
-    @Override
-    public BookRating updateBookRating(BookRating bookRating) {
+    public BookRating saveBookRating(BookRating bookRating) {
         return bookRatingRepository.save(bookRating);
     }
 
