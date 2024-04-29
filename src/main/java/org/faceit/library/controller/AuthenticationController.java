@@ -7,10 +7,7 @@ import org.faceit.library.dto.response.JwtAuthenticationResponseDTO;
 import org.faceit.library.dto.response.SignUpResponseDTO;
 import org.faceit.library.service.AuthenticationService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("${api.prefix}/auth")
@@ -26,5 +23,10 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthenticationResponseDTO> authenticate(@RequestBody SignInRequestDTO request) {
         return ResponseEntity.ok(authenticationService.login(request));
+    }
+
+    @GetMapping("/check-token")
+    public ResponseEntity<Void> checkToken() {
+        return ResponseEntity.ok(null);
     }
 }
