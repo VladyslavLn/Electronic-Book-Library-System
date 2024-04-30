@@ -6,7 +6,10 @@ import org.faceit.library.dto.response.BookResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(uses = {
+        BookReviewMapper.class,
+        BookRatingMapper.class
+})
 public interface BookMapper {
     @Mapping(target = "averageRating", source = "avgRating")
     BookResponseDTO toResponseDTO(Book book);

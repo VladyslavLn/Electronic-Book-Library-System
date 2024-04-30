@@ -6,4 +6,5 @@ import lombok.Data;
 public class BookRatingResponseDTO {
     private Integer id;
     private Integer ratingValue;
+    private UserResponseDTO user;
 }

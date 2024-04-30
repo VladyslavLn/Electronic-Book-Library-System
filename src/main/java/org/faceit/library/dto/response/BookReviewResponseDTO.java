@@ -6,4 +6,5 @@ import lombok.Data;
 public class BookReviewResponseDTO {
     private Integer id;
     private String reviewContent;
+    private UserResponseDTO user;
 }
