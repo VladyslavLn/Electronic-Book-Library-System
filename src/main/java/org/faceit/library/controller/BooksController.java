@@ -37,11 +37,12 @@ public class BooksController {
     private final BookReviewMapper bookReviewMapper;
     private final BookRatingMapper bookRatingMapper;
 
-    @PostMapping
-    public ResponseEntity<BookResponseDTO> createBook(@RequestBody BookRequestDTO bookRequestDTO) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BookResponseDTO> createBook(@RequestPart("book") BookRequestDTO bookRequestDTO,
+                                                      @RequestPart("file") MultipartFile file) {
         return new ResponseEntity<>(
                 bookMapper.toResponseDTO(
-                        bookService.createBook(bookMapper.toEntity(bookRequestDTO))
+                        bookService.createBook(bookMapper.toEntity(bookRequestDTO), file)
                 ), HttpStatus.CREATED
         );
     }
@@ -54,7 +55,7 @@ public class BooksController {
 
     @PutMapping("/{bookId}")
     public ResponseEntity<BookResponseDTO> updateBook(@RequestBody BookRequestDTO bookRequestDTO,
-                                                      @PathVariable Integer bookId) {
+                                                      @PathVariable("bookId") Integer bookId) {
         Book book = bookMapper.toEntity(bookRequestDTO);
         book.setId(bookId);
         return new ResponseEntity<>(
@@ -64,25 +65,25 @@ public class BooksController {
     }
 
     @GetMapping("/{bookId}")
-    public ResponseEntity<BookResponseDTO> getBookById(@PathVariable Integer bookId) {
+    public ResponseEntity<BookResponseDTO> getBookById(@PathVariable("bookId") Integer bookId) {
         Book book = bookService.getBook(bookId);
         return ResponseEntity.ok(bookMapper.toResponseDTO(book));
     }
 
     @DeleteMapping("/{bookId}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Integer bookId) {
+    public ResponseEntity<Void> deleteBook(@PathVariable("bookId") Integer bookId) {
         bookService.deleteBook(bookId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{bookId}/file/upload")
-    public ResponseEntity<String> uploadBook(@PathVariable Integer bookId, @RequestPart MultipartFile file) {
+    public ResponseEntity<String> uploadBook(@PathVariable("bookId") Integer bookId, @RequestPart MultipartFile file) {
         bookService.uploadBookFile(bookId, file);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{bookId}/file/download")
-    public ResponseEntity<Resource> downloadBook(@PathVariable Integer bookId) {
+    public ResponseEntity<Resource> downloadBook(@PathVariable("bookId") Integer bookId) {
         BookFileMetadata data = bookService.downloadBookFile(bookId);
         if (null == data) {
             return ResponseEntity.notFound().build();
@@ -108,43 +109,43 @@ public class BooksController {
 
     @PostMapping("/{bookId}/review")
     public ResponseEntity<BookReviewResponseDTO> addReviewToBook(@AuthenticatedUsername String username,
-                                                                 @PathVariable Integer bookId,
+                                                                 @PathVariable("bookId") Integer bookId,
                                                                  @RequestBody BookReviewRequestDTO bookReviewRequestDTO) {
         BookReview bookReview = bookService.addReviewToBook(username, bookId, bookReviewRequestDTO);
         return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
     }
 
     @PutMapping("/{bookId}/review/{bookReviewId}")
-    public ResponseEntity<BookReviewResponseDTO> updateBookReview(@PathVariable Integer bookId,
-                                                                  @PathVariable Integer bookReviewId,
+    public ResponseEntity<BookReviewResponseDTO> updateBookReview(@PathVariable("bookId") Integer bookId,
+                                                                  @PathVariable("bookReviewId") Integer bookReviewId,
                                                                   @RequestBody BookReviewRequestDTO bookReviewRequestDTO) {
         BookReview bookReview = bookService.updateBookReview(bookReviewRequestDTO, bookReviewId);
         return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
     }
 
     @PostMapping("/{bookId}/rating")
-    public ResponseEntity<BookRatingResponseDTO> addRatingToBook(@AuthenticatedUsername String username, @PathVariable Integer bookId,
+    public ResponseEntity<BookRatingResponseDTO> addRatingToBook(@AuthenticatedUsername String username, @PathVariable("bookId") Integer bookId,
                                                                  @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
         BookRating bookRating = bookService.addRatingToBook(username, bookId, bookRatingRequestDTO);
         return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
     }
 
     @PutMapping("/{bookId}/rating/{bookRatingId}")
-    public ResponseEntity<BookRatingResponseDTO> updateBookRating(@PathVariable Integer bookId,
-                                                                  @PathVariable Integer bookRatingId,
+    public ResponseEntity<BookRatingResponseDTO> updateBookRating(@PathVariable("bookId") Integer bookId,
+                                                                  @PathVariable("bookRatingId") Integer bookRatingId,
                                                                   @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
         BookRating bookRating = bookService.updateBookRating(bookRatingRequestDTO, bookRatingId);
         return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
     }
 
     @DeleteMapping("/{bookId}/rating/{bookRatingId}")
-    public ResponseEntity<Void> deleteBookRating(@PathVariable Integer bookId, @PathVariable Integer bookRatingId) {
+    public ResponseEntity<Void> deleteBookRating(@PathVariable("bookId") Integer bookId, @PathVariable("bookRatingId") Integer bookRatingId) {
         bookService.deleteBookRating(bookId, bookRatingId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{bookId}/review/{bookReviewId}")
-    public ResponseEntity<Void> deleteBookReview(@PathVariable Integer bookId, @PathVariable Integer bookReviewId) {
+    public ResponseEntity<Void> deleteBookReview(@PathVariable("bookId") Integer bookId, @PathVariable("bookReviewId") Integer bookReviewId) {
         bookService.deleteBookReview(bookReviewId);
         return ResponseEntity.ok().build();
     }

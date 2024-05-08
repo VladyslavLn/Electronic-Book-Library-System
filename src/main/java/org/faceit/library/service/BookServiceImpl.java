@@ -1,6 +1,5 @@
 package org.faceit.library.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.faceit.library.db.entity.Book;
@@ -12,6 +11,7 @@ import org.faceit.library.dto.request.BookRatingRequestDTO;
 import org.faceit.library.dto.request.BookReviewRequestDTO;
 import org.faceit.library.model.BookFileMetadata;
 import org.faceit.library.service.exception.BookNotFoundException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class BookServiceImpl implements BookService {
@@ -30,6 +29,28 @@ public class BookServiceImpl implements BookService {
     private final UserService userService;
     private final BookReviewService bookReviewService;
     private final BookRatingService bookRatingService;
+    private final BookCoverService pdfBookCoverServiceImpl;
+    private final BookCoverService epubBookCoverServiceImpl;
+    private final BookCoverService fb2BookCoverServiceImpl;
+
+    public BookServiceImpl(S3Service s3Service, BookRepository bookRepository,
+                           UserService userService, BookReviewService bookReviewService,
+                           BookRatingService bookRatingService,
+                           @Qualifier("pdfBookCoverServiceImpl")
+                           BookCoverService pdfBookCoverService,
+                           @Qualifier("epubBookCoverServiceImpl")
+                           BookCoverService epubBookCoverService,
+                           @Qualifier("fb2BookCoverServiceImpl")
+                           BookCoverService fb2BookCoverService) {
+        this.s3Service = s3Service;
+        this.bookRepository = bookRepository;
+        this.userService = userService;
+        this.bookReviewService = bookReviewService;
+        this.bookRatingService = bookRatingService;
+        this.pdfBookCoverServiceImpl = pdfBookCoverService;
+        this.epubBookCoverServiceImpl = epubBookCoverService;
+        this.fb2BookCoverServiceImpl = fb2BookCoverService;
+    }
 
     @Override
     public Book updateBook(Book book) {
@@ -51,8 +72,21 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book createBook(Book book) {
-        return bookRepository.save(book);
+    public Book createBook(Book book, MultipartFile file) {
+        Book savedBook = bookRepository.save(book);
+        uploadBookFile(savedBook.getId(), file);
+        String bookCoverFileKey = null;
+        String fileExtension = getFileExtension(file);
+        if (StringUtils.isNotBlank(fileExtension)) {
+            bookCoverFileKey = switch (fileExtension) {
+                case "pdf" -> pdfBookCoverServiceImpl.createBookCover(book);
+                case "epub" -> epubBookCoverServiceImpl.createBookCover(book);
+                case "fb2" -> fb2BookCoverServiceImpl.createBookCover(book);
+                default -> throw new IllegalArgumentException("Unsupported file extension: " + fileExtension);
+            };
+        }
+        savedBook.setBookCover(bookCoverFileKey);
+        return bookRepository.save(savedBook);
     }
 
     @Override
@@ -158,5 +192,16 @@ public class BookServiceImpl implements BookService {
     @Override
     public void deleteBookReview(Integer bookReviewId) {
         bookReviewService.deleteBookReview(bookReviewId);
+    }
+
+    private String getFileExtension(MultipartFile file) {
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName != null) {
+            int lastDot = originalFileName.lastIndexOf('.');
+            if (lastDot >= 0) {
+                return originalFileName.substring(lastDot + 1);
+            }
+        }
+        return null;
     }
 }

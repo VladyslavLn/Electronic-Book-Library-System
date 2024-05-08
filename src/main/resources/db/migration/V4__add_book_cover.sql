@@ -1,0 +1,1 @@
+ALTER TABLE books ADD COLUMN IF NOT EXISTS book_cover TEXT;

@@ -27,6 +27,8 @@ public class Book {
     private String language;
     @Column(name = "file_key")
     private String fileKey;
+    @Column(name = "book_cover")
+    private String bookCover;
     @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE)
     private List<BookReview> reviews;
     @OneToMany(mappedBy = "book", cascade = CascadeType.REMOVE)

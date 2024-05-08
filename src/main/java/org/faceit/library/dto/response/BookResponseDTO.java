@@ -14,4 +14,5 @@ public class BookResponseDTO {
     private List<BookReviewResponseDTO> reviews;
     private List<BookRatingResponseDTO> ratings;
     private Double averageRating;
+    private byte[] cover;
 }

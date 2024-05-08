@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BookService {
-    Book createBook(Book book);
+    Book createBook(Book book, MultipartFile file);
 
     Book getBook(Integer bookId);
 
