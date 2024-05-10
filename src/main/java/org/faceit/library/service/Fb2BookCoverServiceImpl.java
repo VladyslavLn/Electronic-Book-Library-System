@@ -41,7 +41,7 @@ public class Fb2BookCoverServiceImpl implements BookCoverService {
                 if (binaryNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element binaryElement = (Element) binaryNode;
                     String id = binaryElement.getAttribute("id");
-                    if (StringUtils.isNotBlank(id) && id.startsWith("cover")) {
+                    if (StringUtils.isNotBlank(id)) {
                         String coverData = binaryElement.getTextContent();
                         byte[] bytes = Base64.getMimeDecoder().decode(coverData);
                         BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
