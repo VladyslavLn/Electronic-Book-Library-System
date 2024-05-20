@@ -33,9 +33,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Integer userId, @RequestBody UserRequestDTO userRequestDTO) {
-        User user = userMapper.toEntity(userRequestDTO);
-        user.setId(userId);
-        User savedUser = userService.saveUser(user);
+        User savedUser = userService.updateUser(userId, userRequestDTO);
         return ResponseEntity.ok(userMapper.toResponseDTO(savedUser));
     }
 

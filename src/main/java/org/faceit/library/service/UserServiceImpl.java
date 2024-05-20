@@ -3,6 +3,7 @@ package org.faceit.library.service;
 import lombok.RequiredArgsConstructor;
 import org.faceit.library.db.entity.User;
 import org.faceit.library.db.repository.UserRepository;
+import org.faceit.library.dto.request.UserRequestDTO;
 import org.faceit.library.service.exception.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +47,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public User updateUser(Integer userId, UserRequestDTO userRequestDTO) {
+        User userToUpdate = getUserById(userId);
+        userToUpdate.setFirstName(userRequestDTO.getFirstName());
+        userToUpdate.setLastName(userRequestDTO.getLastName());
+        return userRepository.save(userToUpdate);
     }
 }

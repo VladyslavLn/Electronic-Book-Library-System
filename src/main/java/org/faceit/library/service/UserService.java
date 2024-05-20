@@ -1,6 +1,7 @@
 package org.faceit.library.service;
 
 import org.faceit.library.db.entity.User;
+import org.faceit.library.dto.request.UserRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,5 +17,5 @@ public interface UserService {
 
     void deleteUserById(Integer userId);
 
-    User saveUser(User user);
+    User updateUser(Integer userId, UserRequestDTO userRequestDTO);
 }

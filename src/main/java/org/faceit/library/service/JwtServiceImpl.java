@@ -5,7 +5,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.faceit.library.db.entity.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +30,13 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(User user) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", user.getId());
+        extraClaims.put("roles", ((UserDetails) user).getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList());
+        return generateToken(extraClaims, user);
     }
 
     @Override
@@ -44,7 +51,9 @@ public class JwtServiceImpl implements JwtService {
     }
 
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
+        return Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpireTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
