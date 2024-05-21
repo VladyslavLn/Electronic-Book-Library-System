@@ -16,7 +16,8 @@ public class CORSConfig {
                         .allowedOrigins(
                                 "http://localhost:4200"
                         )
-                        .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
+                        .allowedMethods("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                        .exposedHeaders("Content-Disposition");
             }
         };
     }
