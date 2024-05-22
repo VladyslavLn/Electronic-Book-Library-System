@@ -5,9 +5,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.faceit.library.db.entity.Role;
 import org.faceit.library.db.entity.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +33,8 @@ public class JwtServiceImpl implements JwtService {
     public String generateToken(User user) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("userId", user.getId());
-        extraClaims.put("roles", ((UserDetails) user).getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
+        extraClaims.put("roles", user.getRole().stream()
+                .map(Role::getName)
                 .toList());
         return generateToken(extraClaims, user);
     }

@@ -115,26 +115,10 @@ public class BooksController {
         return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
     }
 
-    @PutMapping("/{bookId}/review/{bookReviewId}")
-    public ResponseEntity<BookReviewResponseDTO> updateBookReview(@PathVariable("bookId") Integer bookId,
-                                                                  @PathVariable("bookReviewId") Integer bookReviewId,
-                                                                  @RequestBody BookReviewRequestDTO bookReviewRequestDTO) {
-        BookReview bookReview = bookService.updateBookReview(bookReviewRequestDTO, bookReviewId);
-        return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
-    }
-
     @PostMapping("/{bookId}/rating")
     public ResponseEntity<BookRatingResponseDTO> addRatingToBook(@AuthenticatedUsername String username, @PathVariable("bookId") Integer bookId,
                                                                  @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
         BookRating bookRating = bookService.addRatingToBook(username, bookId, bookRatingRequestDTO);
-        return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
-    }
-
-    @PutMapping("/{bookId}/rating/{bookRatingId}")
-    public ResponseEntity<BookRatingResponseDTO> updateBookRating(@PathVariable("bookId") Integer bookId,
-                                                                  @PathVariable("bookRatingId") Integer bookRatingId,
-                                                                  @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
-        BookRating bookRating = bookService.updateBookRating(bookRatingRequestDTO, bookRatingId);
         return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
     }
 

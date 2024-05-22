@@ -153,34 +153,6 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookReview updateBookReview(BookReviewRequestDTO bookReviewRequestDTO, Integer bookReviewId) {
-        BookReview bookReview = bookReviewService.getBookReview(bookReviewId);
-        bookReview.setReviewContent(bookReviewRequestDTO.getContent());
-        return bookReviewService.saveBookReview(bookReview);
-    }
-
-    @Override
-    public BookRating updateBookRating(BookRatingRequestDTO bookRatingRequestDTO, Integer bookReviewId) {
-        BookRating bookRating = bookRatingService.getBookRatingById(bookReviewId);
-        bookRating.setRatingValue(bookRatingRequestDTO.getRatingValue());
-        bookRatingService.saveBookRating(bookRating);
-
-        Book bookRatingBook = bookRating.getBook();
-        List<BookRating> bookRatings = bookRatingBook.getRatings();
-
-        double totalRatingValue = 0;
-        for (BookRating rating : bookRatings) {
-            totalRatingValue += rating.getRatingValue();
-        }
-        double averageRating = totalRatingValue / bookRatings.size();
-
-        bookRatingBook.setAvgRating(averageRating);
-        bookRepository.save(bookRatingBook);
-
-        return bookRating;
-    }
-
-    @Override
     public void deleteBookRating(Integer bookId, Integer bookRatingId) {
         Book book = bookRepository.getReferenceById(bookId);
         bookRatingService.deleteBookRating(bookRatingId);

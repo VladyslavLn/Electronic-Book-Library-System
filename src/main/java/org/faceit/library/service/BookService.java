@@ -29,10 +29,6 @@ public interface BookService {
 
     BookRating addRatingToBook(String username, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO);
 
-    BookReview updateBookReview(BookReviewRequestDTO bookReviewRequestDTO, Integer bookReviewId);
-
-    BookRating updateBookRating(BookRatingRequestDTO bookRatingRequestDTO, Integer bookReviewId);
-
     void deleteBookRating(Integer bookId, Integer bookRatingId);
 
     void deleteBookReview(Integer bookReviewId);

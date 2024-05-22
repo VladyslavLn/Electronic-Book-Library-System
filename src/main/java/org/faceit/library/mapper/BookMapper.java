@@ -10,11 +10,13 @@ import org.mapstruct.Mapping;
 @Mapper(uses = {
         BookReviewMapper.class,
         BookRatingMapper.class,
+        UserMapper.class,
         BookMapperHelper.class
 })
 public interface BookMapper {
     @Mapping(target = "averageRating", source = "avgRating")
     @Mapping(target = "cover", source = "bookCover", qualifiedByName = "mapCover")
+    @Mapping(target = "reviewAndRatings", expression = "java(bookMapperHelper.mapToReviewAndRatings(book.getReviews(), book.getRatings()))")
     BookResponseDTO toResponseDTO(Book book);
 
     Book toEntity(BookRequestDTO bookRequestDTO);

@@ -11,8 +11,7 @@ public class BookResponseDTO {
     private String author;
     private String language;
     private String fileKey;
-    private List<BookReviewResponseDTO> reviews;
-    private List<BookRatingResponseDTO> ratings;
+    private List<BookReviewAndRatingResponseDTO> reviewAndRatings;
     private Double averageRating;
     private byte[] cover;
 }
