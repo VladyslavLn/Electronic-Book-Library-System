@@ -1,10 +1,7 @@
 package org.faceit.library.controller;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.faceit.library.service.exception.BookNotFoundException;
-import org.faceit.library.service.exception.S3Exception;
-import org.faceit.library.service.exception.UserAlreadyExistException;
-import org.faceit.library.service.exception.UserNotFoundException;
+import org.faceit.library.service.exception.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +34,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             S3Exception.class,
             IllegalArgumentException.class,
             AuthenticationException.class,
-            UserAlreadyExistException.class
+            UserAlreadyExistException.class,
+            AccessDeniedException.class
     })
     public ResponseEntity<Object> handleBadRequest(Exception exception, WebRequest request) {
         Map<String, String> body = new HashMap<>();

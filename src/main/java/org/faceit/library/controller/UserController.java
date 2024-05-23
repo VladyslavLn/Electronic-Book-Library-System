@@ -1,6 +1,7 @@
 package org.faceit.library.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.faceit.library.aop.AuthenticatedUsername;
 import org.faceit.library.db.entity.User;
 import org.faceit.library.dto.request.UserRequestDTO;
 import org.faceit.library.dto.response.UserResponseDTO;
@@ -26,19 +27,25 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> getUserByUserId(@PathVariable("userId") Integer userId) {
+    public ResponseEntity<UserResponseDTO> getUserByUserId(@AuthenticatedUsername String username,
+                                                           @PathVariable("userId") Integer userId) {
+        userService.checkUserAccess(username, userId);
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(userMapper.toResponseDTO(user));
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable("userId") Integer userId, @RequestBody UserRequestDTO userRequestDTO) {
+    public ResponseEntity<UserResponseDTO> updateUser(@AuthenticatedUsername String username,
+                                                      @PathVariable("userId") Integer userId,
+                                                      @RequestBody UserRequestDTO userRequestDTO) {
+        userService.checkUserAccess(username, userId);
         User savedUser = userService.updateUser(userId, userRequestDTO);
         return ResponseEntity.ok(userMapper.toResponseDTO(savedUser));
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUserByUserId(@PathVariable("userId") Integer userId) {
+    public ResponseEntity<Void> deleteUserByUserId(@AuthenticatedUsername String username,
+                                                   @PathVariable("userId") Integer userId) {
         userService.deleteUserById(userId);
         return ResponseEntity.ok().build();
     }

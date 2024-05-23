@@ -18,4 +18,6 @@ public interface UserService {
     void deleteUserById(Integer userId);
 
     User updateUser(Integer userId, UserRequestDTO userRequestDTO);
+
+    void checkUserAccess(String username, Integer userId);
 }

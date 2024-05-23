@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.faceit.library.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -22,6 +23,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
+    private static final String ADMIN_ROLE = "ROLE_ADMIN";
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
 
@@ -31,8 +33,10 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         request -> request
-                                .requestMatchers("/api/v1/users/**")
-                                .hasAnyAuthority("ROLE_ADMIN"))
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users")
+                                .hasAuthority(ADMIN_ROLE)
+                                .requestMatchers(HttpMethod.DELETE, "api/v1/users/**")
+                                .hasAuthority(ADMIN_ROLE))
                 .authorizeHttpRequests(
                         request -> request
                                 .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register")

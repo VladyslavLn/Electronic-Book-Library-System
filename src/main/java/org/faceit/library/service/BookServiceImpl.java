@@ -72,7 +72,9 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book createBook(Book book, MultipartFile file) {
+    public Book createBook(String username, Book book, MultipartFile file) {
+        User user = userService.getUserByEmail(username);
+        book.setCreatedBy(user);
         Book savedBook = bookRepository.save(book);
         uploadBookFile(savedBook.getId(), file);
         String bookCoverFileKey = null;
@@ -164,6 +166,12 @@ public class BookServiceImpl implements BookService {
     @Override
     public void deleteBookReview(Integer bookReviewId) {
         bookReviewService.deleteBookReview(bookReviewId);
+    }
+
+    @Override
+    public Page<Book> getDownloadedBooksByUsername(String username, Pageable pageable) {
+        User user = userService.getUserByEmail(username);
+        return bookRepository.getBooksByCreatedBy(user, pageable);
     }
 
     private String getFileExtension(MultipartFile file) {

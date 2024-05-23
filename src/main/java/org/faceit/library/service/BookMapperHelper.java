@@ -39,6 +39,9 @@ public class BookMapperHelper {
     @Named("mapToReviewAndRatings")
     public List<BookReviewAndRatingResponseDTO> mapToReviewAndRatings(
             List<BookReview> reviews, List<BookRating> ratings) {
+        if (reviews == null || ratings == null) {
+            return new ArrayList<>();
+        }
         Map<User, BookReview> reviewsByUser = reviews.stream()
                 .collect(Collectors.toMap(BookReview::getUser, Function.identity()));
         Map<User, BookRating> ratingsByUser = ratings.stream()

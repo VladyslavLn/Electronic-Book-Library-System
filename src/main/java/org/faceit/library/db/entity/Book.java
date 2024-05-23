@@ -37,6 +37,9 @@ public class Book {
     @Min(value = 0)
     @Max(value = 5)
     private Double avgRating;
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
     @Column(name = "created_at")
     @CreationTimestamp
     private OffsetDateTime createdAt;

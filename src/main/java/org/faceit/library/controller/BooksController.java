@@ -38,11 +38,11 @@ public class BooksController {
     private final BookRatingMapper bookRatingMapper;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BookResponseDTO> createBook(@RequestPart("book") BookRequestDTO bookRequestDTO,
+    public ResponseEntity<BookResponseDTO> createBook(@AuthenticatedUsername String username, @RequestPart("book") BookRequestDTO bookRequestDTO,
                                                       @RequestPart("file") MultipartFile file) {
         return new ResponseEntity<>(
                 bookMapper.toResponseDTO(
-                        bookService.createBook(bookMapper.toEntity(bookRequestDTO), file)
+                        bookService.createBook(username, bookMapper.toEntity(bookRequestDTO), file)
                 ), HttpStatus.CREATED
         );
     }
@@ -132,5 +132,13 @@ public class BooksController {
     public ResponseEntity<Void> deleteBookReview(@PathVariable("bookId") Integer bookId, @PathVariable("bookReviewId") Integer bookReviewId) {
         bookService.deleteBookReview(bookReviewId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/my-books")
+    public ResponseEntity<Page<BookResponseDTO>> getDownloadedBooksByUsername(@AuthenticatedUsername String username,
+                                                                              Pageable pageable) {
+        Page<BookResponseDTO> downloadedBooksByUser = bookService.getDownloadedBooksByUsername(username, pageable)
+                .map(bookMapper::toResponseDTO);
+        return ResponseEntity.ok(downloadedBooksByUser);
     }
 }

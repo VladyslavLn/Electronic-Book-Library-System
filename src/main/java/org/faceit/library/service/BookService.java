@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BookService {
-    Book createBook(Book book, MultipartFile file);
+    Book createBook(String username, Book book, MultipartFile file);
 
     Book getBook(Integer bookId);
 
@@ -32,4 +32,6 @@ public interface BookService {
     void deleteBookRating(Integer bookId, Integer bookRatingId);
 
     void deleteBookReview(Integer bookReviewId);
+
+    Page<Book> getDownloadedBooksByUsername(String username, Pageable pageable);
 }
