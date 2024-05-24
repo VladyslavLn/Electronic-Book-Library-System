@@ -13,8 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -60,17 +58,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void checkUserAccess(String email, Integer userId) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+        User user = getUserByEmail(email);
+        boolean isAdmin = user.getRole().stream()
+                .map(Role::getName)
+                .anyMatch(roleName -> roleName.equals("ADMIN"));
 
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            boolean isAdmin = user.getRole().stream()
-                    .map(Role::getName)
-                    .anyMatch(roleName -> roleName.equals("ADMIN"));
-
-            if (!user.getId().equals(userId) && !isAdmin) {
-                throw new AccessDeniedException("User does not have access to perform this action");
-            }
+        if (!user.getId().equals(userId) && !isAdmin) {
+            throw new AccessDeniedException("User does not have access to perform this action");
         }
     }
 }

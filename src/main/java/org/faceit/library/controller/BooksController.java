@@ -54,13 +54,12 @@ public class BooksController {
     }
 
     @PutMapping("/{bookId}")
-    public ResponseEntity<BookResponseDTO> updateBook(@RequestBody BookRequestDTO bookRequestDTO,
+    public ResponseEntity<BookResponseDTO> updateBook(@AuthenticatedUsername String username,
+                                                      @RequestBody BookRequestDTO bookRequestDTO,
                                                       @PathVariable("bookId") Integer bookId) {
-        Book book = bookMapper.toEntity(bookRequestDTO);
-        book.setId(bookId);
         return new ResponseEntity<>(
                 bookMapper.toResponseDTO(
-                        bookService.updateBook(book)), HttpStatus.CREATED
+                        bookService.updateBook(bookId, bookRequestDTO, username)), HttpStatus.CREATED
         );
     }
 

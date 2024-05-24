@@ -4,6 +4,7 @@ import org.faceit.library.db.entity.Book;
 import org.faceit.library.db.entity.BookRating;
 import org.faceit.library.db.entity.BookReview;
 import org.faceit.library.dto.request.BookRatingRequestDTO;
+import org.faceit.library.dto.request.BookRequestDTO;
 import org.faceit.library.dto.request.BookReviewRequestDTO;
 import org.faceit.library.model.BookFileMetadata;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,8 @@ public interface BookService {
 
     void deleteBook(Integer bookId);
 
-    Book updateBook(Book entity);
+    Book updateBook(Integer bookId, BookRequestDTO requestDTO, String username);
+
 
     BookFileMetadata downloadBookFile(Integer bookId);
 

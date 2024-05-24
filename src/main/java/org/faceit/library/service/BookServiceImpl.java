@@ -8,6 +8,7 @@ import org.faceit.library.db.entity.BookReview;
 import org.faceit.library.db.entity.User;
 import org.faceit.library.db.repository.BookRepository;
 import org.faceit.library.dto.request.BookRatingRequestDTO;
+import org.faceit.library.dto.request.BookRequestDTO;
 import org.faceit.library.dto.request.BookReviewRequestDTO;
 import org.faceit.library.model.BookFileMetadata;
 import org.faceit.library.service.exception.BookNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -53,8 +55,17 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book updateBook(Book book) {
-        return bookRepository.save(book);
+    public Book updateBook(Integer bookId, BookRequestDTO requestDTO, String username) {
+        Optional<Book> book = bookRepository.findById(bookId);
+        if (book.isPresent()) {
+            Book bookToUpdate = book.get();
+            userService.checkUserAccess(username, bookToUpdate.getCreatedBy().getId());
+            bookToUpdate.setTitle(requestDTO.getTitle());
+            bookToUpdate.setAuthor(requestDTO.getAuthor());
+            bookToUpdate.setLanguage(requestDTO.getLanguage());
+            return bookRepository.save(bookToUpdate);
+        }
+        throw new BookNotFoundException(bookId);
     }
 
     @Override

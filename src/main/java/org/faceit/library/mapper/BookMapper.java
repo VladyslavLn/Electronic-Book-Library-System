@@ -17,6 +17,7 @@ public interface BookMapper {
     @Mapping(target = "averageRating", source = "avgRating")
     @Mapping(target = "cover", source = "bookCover", qualifiedByName = "mapCover")
     @Mapping(target = "reviewAndRatings", expression = "java(bookMapperHelper.mapToReviewAndRatings(book.getReviews(), book.getRatings()))")
+    @Mapping(target = "user", source = "createdBy")
     BookResponseDTO toResponseDTO(Book book);
 
     Book toEntity(BookRequestDTO bookRequestDTO);
