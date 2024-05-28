@@ -18,9 +18,7 @@ import java.util.Map;
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {
-            UserNotFoundException.class,
             UsernameNotFoundException.class,
-            BookNotFoundException.class,
             EntityNotFoundException.class,
     })
     public ResponseEntity<Object> handleNotFound(Exception exception, WebRequest request) {

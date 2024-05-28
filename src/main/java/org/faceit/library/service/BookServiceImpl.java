@@ -11,7 +11,6 @@ import org.faceit.library.dto.request.BookRatingRequestDTO;
 import org.faceit.library.dto.request.BookRequestDTO;
 import org.faceit.library.dto.request.BookReviewRequestDTO;
 import org.faceit.library.model.BookFileMetadata;
-import org.faceit.library.service.exception.BookNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -31,51 +30,47 @@ public class BookServiceImpl implements BookService {
     private final UserService userService;
     private final BookReviewService bookReviewService;
     private final BookRatingService bookRatingService;
-    private final BookCoverService pdfBookCoverServiceImpl;
-    private final BookCoverService epubBookCoverServiceImpl;
-    private final BookCoverService fb2BookCoverServiceImpl;
+    private final BookCoverService pdfBookCoverService;
+    private final BookCoverService epubBookCoverService;
+    private final BookCoverService fb2BookCoverService;
 
     public BookServiceImpl(S3Service s3Service, BookRepository bookRepository,
                            UserService userService, BookReviewService bookReviewService,
                            BookRatingService bookRatingService,
-                           @Qualifier("pdfBookCoverServiceImpl")
+                           @Qualifier("pdfBookCoverService")
                            BookCoverService pdfBookCoverService,
-                           @Qualifier("epubBookCoverServiceImpl")
+                           @Qualifier("epubBookCoverService")
                            BookCoverService epubBookCoverService,
-                           @Qualifier("fb2BookCoverServiceImpl")
+                           @Qualifier("fb2BookCoverService")
                            BookCoverService fb2BookCoverService) {
         this.s3Service = s3Service;
         this.bookRepository = bookRepository;
         this.userService = userService;
         this.bookReviewService = bookReviewService;
         this.bookRatingService = bookRatingService;
-        this.pdfBookCoverServiceImpl = pdfBookCoverService;
-        this.epubBookCoverServiceImpl = epubBookCoverService;
-        this.fb2BookCoverServiceImpl = fb2BookCoverService;
+        this.pdfBookCoverService = pdfBookCoverService;
+        this.epubBookCoverService = epubBookCoverService;
+        this.fb2BookCoverService = fb2BookCoverService;
     }
 
     @Override
-    public Book updateBook(Integer bookId, BookRequestDTO requestDTO, String username) {
-        Optional<Book> book = bookRepository.findById(bookId);
-        if (book.isPresent()) {
-            Book bookToUpdate = book.get();
-            userService.checkUserAccess(username, bookToUpdate.getCreatedBy().getId());
-            bookToUpdate.setTitle(requestDTO.getTitle());
-            bookToUpdate.setAuthor(requestDTO.getAuthor());
-            bookToUpdate.setLanguage(requestDTO.getLanguage());
-            return bookRepository.save(bookToUpdate);
-        }
-        throw new BookNotFoundException(bookId);
+    public Book updateBook(Integer bookId, BookRequestDTO requestDTO, String userEmail) {
+        Book bookToUpdate = bookRepository.getReferenceById(bookId);
+        userService.checkUserAccess(userEmail, bookToUpdate.getCreatedBy().getId());
+        bookToUpdate.setTitle(requestDTO.getTitle());
+        bookToUpdate.setAuthor(requestDTO.getAuthor());
+        bookToUpdate.setLanguage(requestDTO.getLanguage());
+        return bookRepository.save(bookToUpdate);
     }
 
     @Override
     public Book getBook(Integer bookId) {
-        return bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        return bookRepository.getReferenceById(bookId);
     }
 
     @Override
     public void deleteBook(Integer bookId) {
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        Book book = bookRepository.getReferenceById(bookId);
         bookRepository.deleteById(bookId);
         if (StringUtils.isNotBlank(book.getFileKey())) {
             s3Service.deleteObject(book.getFileKey());
@@ -83,21 +78,19 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book createBook(String username, Book book, MultipartFile file) {
-        User user = userService.getUserByEmail(username);
+    public Book createBook(String userEmail, Book book, MultipartFile file) {
+        User user = userService.getUserByEmail(userEmail);
         book.setCreatedBy(user);
         Book savedBook = bookRepository.save(book);
         uploadBookFile(savedBook.getId(), file);
-        String bookCoverFileKey = null;
+        String bookCoverFileKey;
         String fileExtension = getFileExtension(file);
-        if (StringUtils.isNotBlank(fileExtension)) {
-            bookCoverFileKey = switch (fileExtension) {
-                case "pdf" -> pdfBookCoverServiceImpl.createBookCover(book);
-                case "epub" -> epubBookCoverServiceImpl.createBookCover(book);
-                case "fb2" -> fb2BookCoverServiceImpl.createBookCover(book);
-                default -> throw new IllegalArgumentException("Unsupported file extension: " + fileExtension);
-            };
-        }
+        bookCoverFileKey = switch (fileExtension) {
+            case "pdf" -> pdfBookCoverService.createBookCover(book);
+            case "epub" -> epubBookCoverService.createBookCover(book);
+            case "fb2" -> fb2BookCoverService.createBookCover(book);
+            default -> throw new IllegalArgumentException("Unsupported file extension: " + fileExtension);
+        };
         savedBook.setBookCover(bookCoverFileKey);
         return bookRepository.save(savedBook);
     }
@@ -109,7 +102,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookFileMetadata downloadBookFile(Integer bookId) {
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        Book book = bookRepository.getReferenceById(bookId);
         if (StringUtils.isNotBlank(book.getFileKey())) {
             byte[] file = s3Service.getObject(book.getFileKey());
             return new BookFileMetadata(book.getFileKey(), file);
@@ -120,7 +113,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public void uploadBookFile(Integer bookId, MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
+        Book book = bookRepository.getReferenceById(bookId);
         book.setFileKey(originalFilename);
         bookRepository.save(book);
         try {
@@ -131,9 +124,9 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookReview addReviewToBook(String username, Integer bookId, BookReviewRequestDTO bookReviewRequestDTO) {
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
-        User user = userService.getUserByEmail(username);
+    public BookReview addReviewToBook(String userEmail, Integer bookId, BookReviewRequestDTO bookReviewRequestDTO) {
+        Book book = bookRepository.getReferenceById(bookId);
+        User user = userService.getUserByEmail(userEmail);
         BookReview bookReview = BookReview.builder()
                 .book(book)
                 .user(user)
@@ -143,9 +136,9 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookRating addRatingToBook(String username, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO) {
-        Book book = bookRepository.findById(bookId).orElseThrow(() -> new BookNotFoundException(bookId));
-        User user = userService.getUserByEmail(username);
+    public BookRating addRatingToBook(String userEmail, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO) {
+        Book book = bookRepository.getReferenceById(bookId);
+        User user = userService.getUserByEmail(userEmail);
         BookRating bookRating = BookRating.builder()
                 .book(book)
                 .user(user)
@@ -169,7 +162,9 @@ public class BookServiceImpl implements BookService {
     public void deleteBookRating(Integer bookId, Integer bookRatingId) {
         Book book = bookRepository.getReferenceById(bookId);
         bookRatingService.deleteBookRating(bookRatingId);
-        book.getRatings().removeIf(rating -> rating.getId().equals(bookRatingId));
+        List<BookRating> ratings = new ArrayList<>(book.getRatings());
+        ratings.removeIf(rating -> rating.getId().equals(bookRatingId));
+        book.setRatings(ratings);
         book.setAvgRating(calculateAverageRating(book.getRatings()));
         bookRepository.save(book);
     }
@@ -180,8 +175,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Page<Book> getDownloadedBooksByUsername(String username, Pageable pageable) {
-        User user = userService.getUserByEmail(username);
+    public Page<Book> getDownloadedBooksByUserEmail(String userEmail, Pageable pageable) {
+        User user = userService.getUserByEmail(userEmail);
         return bookRepository.getBooksByCreatedBy(user, pageable);
     }
 
@@ -193,6 +188,6 @@ public class BookServiceImpl implements BookService {
                 return originalFileName.substring(lastDot + 1);
             }
         }
-        return null;
+        return "";
     }
 }

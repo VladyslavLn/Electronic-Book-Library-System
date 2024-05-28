@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BookService {
-    Book createBook(String username, Book book, MultipartFile file);
+    Book createBook(String userEmail, Book book, MultipartFile file);
 
     Book getBook(Integer bookId);
 
@@ -20,20 +20,20 @@ public interface BookService {
 
     void deleteBook(Integer bookId);
 
-    Book updateBook(Integer bookId, BookRequestDTO requestDTO, String username);
+    Book updateBook(Integer bookId, BookRequestDTO requestDTO, String userEmail);
 
 
     BookFileMetadata downloadBookFile(Integer bookId);
 
     void uploadBookFile(Integer bookId, MultipartFile file);
 
-    BookReview addReviewToBook(String username, Integer bookId, BookReviewRequestDTO bookReviewRequestDTO);
+    BookReview addReviewToBook(String userEmail, Integer bookId, BookReviewRequestDTO bookReviewRequestDTO);
 
-    BookRating addRatingToBook(String username, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO);
+    BookRating addRatingToBook(String userEmail, Integer bookId, BookRatingRequestDTO bookRatingRequestDTO);
 
     void deleteBookRating(Integer bookId, Integer bookRatingId);
 
     void deleteBookReview(Integer bookReviewId);
 
-    Page<Book> getDownloadedBooksByUsername(String username, Pageable pageable);
+    Page<Book> getDownloadedBooksByUserEmail(String userEmail, Pageable pageable);
 }

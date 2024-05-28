@@ -1,7 +1,7 @@
 package org.faceit.library.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.faceit.library.aop.AuthenticatedUsername;
+import org.faceit.library.aop.AuthenticatedUserEmail;
 import org.faceit.library.db.entity.Book;
 import org.faceit.library.db.entity.BookRating;
 import org.faceit.library.db.entity.BookReview;
@@ -38,7 +38,7 @@ public class BooksController {
     private final BookRatingMapper bookRatingMapper;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BookResponseDTO> createBook(@AuthenticatedUsername String username, @RequestPart("book") BookRequestDTO bookRequestDTO,
+    public ResponseEntity<BookResponseDTO> createBook(@AuthenticatedUserEmail String username, @RequestPart("book") BookRequestDTO bookRequestDTO,
                                                       @RequestPart("file") MultipartFile file) {
         return new ResponseEntity<>(
                 bookMapper.toResponseDTO(
@@ -54,12 +54,12 @@ public class BooksController {
     }
 
     @PutMapping("/{bookId}")
-    public ResponseEntity<BookResponseDTO> updateBook(@AuthenticatedUsername String username,
+    public ResponseEntity<BookResponseDTO> updateBook(@AuthenticatedUserEmail String userEmail,
                                                       @RequestBody BookRequestDTO bookRequestDTO,
                                                       @PathVariable("bookId") Integer bookId) {
         return new ResponseEntity<>(
                 bookMapper.toResponseDTO(
-                        bookService.updateBook(bookId, bookRequestDTO, username)), HttpStatus.CREATED
+                        bookService.updateBook(bookId, bookRequestDTO, userEmail)), HttpStatus.CREATED
         );
     }
 
@@ -107,17 +107,17 @@ public class BooksController {
     }
 
     @PostMapping("/{bookId}/review")
-    public ResponseEntity<BookReviewResponseDTO> addReviewToBook(@AuthenticatedUsername String username,
+    public ResponseEntity<BookReviewResponseDTO> addReviewToBook(@AuthenticatedUserEmail String userEmail,
                                                                  @PathVariable("bookId") Integer bookId,
                                                                  @RequestBody BookReviewRequestDTO bookReviewRequestDTO) {
-        BookReview bookReview = bookService.addReviewToBook(username, bookId, bookReviewRequestDTO);
+        BookReview bookReview = bookService.addReviewToBook(userEmail, bookId, bookReviewRequestDTO);
         return ResponseEntity.ok(bookReviewMapper.toDto(bookReview));
     }
 
     @PostMapping("/{bookId}/rating")
-    public ResponseEntity<BookRatingResponseDTO> addRatingToBook(@AuthenticatedUsername String username, @PathVariable("bookId") Integer bookId,
+    public ResponseEntity<BookRatingResponseDTO> addRatingToBook(@AuthenticatedUserEmail String userEmail, @PathVariable("bookId") Integer bookId,
                                                                  @RequestBody BookRatingRequestDTO bookRatingRequestDTO) {
-        BookRating bookRating = bookService.addRatingToBook(username, bookId, bookRatingRequestDTO);
+        BookRating bookRating = bookService.addRatingToBook(userEmail, bookId, bookRatingRequestDTO);
         return ResponseEntity.ok(bookRatingMapper.toDto(bookRating));
     }
 
@@ -134,9 +134,9 @@ public class BooksController {
     }
 
     @GetMapping("/my-books")
-    public ResponseEntity<Page<BookResponseDTO>> getDownloadedBooksByUsername(@AuthenticatedUsername String username,
+    public ResponseEntity<Page<BookResponseDTO>> getDownloadedBooksByUsername(@AuthenticatedUserEmail String userEmail,
                                                                               Pageable pageable) {
-        Page<BookResponseDTO> downloadedBooksByUser = bookService.getDownloadedBooksByUsername(username, pageable)
+        Page<BookResponseDTO> downloadedBooksByUser = bookService.getDownloadedBooksByUserEmail(userEmail, pageable)
                 .map(bookMapper::toResponseDTO);
         return ResponseEntity.ok(downloadedBooksByUser);
     }

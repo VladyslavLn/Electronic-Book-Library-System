@@ -18,7 +18,7 @@ public class UsernameHandlerMethodArgumentResolver implements HandlerMethodArgum
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterAnnotation(AuthenticatedUsername.class) != null;
+        return parameter.getParameterAnnotation(AuthenticatedUserEmail.class) != null;
     }
 
     @Override

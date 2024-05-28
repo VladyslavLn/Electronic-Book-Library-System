@@ -19,5 +19,5 @@ public interface UserService {
 
     User updateUser(Integer userId, UserRequestDTO userRequestDTO);
 
-    void checkUserAccess(String username, Integer userId);
+    void checkUserAccess(String userEmail, Integer userId);
 }
