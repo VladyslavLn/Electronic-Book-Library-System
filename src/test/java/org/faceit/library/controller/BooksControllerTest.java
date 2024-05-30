@@ -1,6 +1,7 @@
 package org.faceit.library.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aspectj.lang.annotation.Before;
 import org.faceit.library.JwtUtil;
 import org.faceit.library.db.entity.Book;
 import org.faceit.library.db.entity.BookRating;
@@ -18,6 +19,8 @@ import org.faceit.library.mapper.BookRatingMapper;
 import org.faceit.library.mapper.BookReviewMapper;
 import org.faceit.library.model.BookFileMetadata;
 import org.faceit.library.service.BookService;
+import org.faceit.library.service.S3Service;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +71,13 @@ class BooksControllerTest {
     private ObjectMapper objectMapper;
     @MockBean
     private UserRepository userRepository;
+    @MockBean
+    private S3Service s3Service;
+
+    @BeforeEach
+    void init() {
+        when(s3Service.getObject(any())).thenReturn(new byte[0]);
+    }
 
     @Test
     void testCreateBook() throws Exception {
