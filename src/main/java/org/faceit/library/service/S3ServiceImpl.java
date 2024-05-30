@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
     private static final String BOOKS_FOLDER = "books/";
+    private static final String BOOKS_COVER_FOLDER = "books-cover/";
     private final S3Client s3Client;
     @Value("${aws.bucket}")
     private String bucketName;
@@ -33,10 +34,18 @@ public class S3ServiceImpl implements S3Service {
     }
 
     public byte[] getObject(String fileKey) {
+        return getObjectFromS3(fileKey, BOOKS_FOLDER);
+    }
+
+    public byte[] getBookCover(String fileKey) {
+        return getObjectFromS3(fileKey, BOOKS_COVER_FOLDER);
+    }
+
+    private byte[] getObjectFromS3(String fileKey, String booksCoverFolder) {
         try {
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(BOOKS_FOLDER + fileKey)
+                    .key(booksCoverFolder + fileKey)
                     .build();
             ResponseInputStream<GetObjectResponse> response = s3Client.getObject(getObjectRequest);
             return response.readAllBytes();

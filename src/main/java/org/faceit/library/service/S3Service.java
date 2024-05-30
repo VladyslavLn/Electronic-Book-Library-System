@@ -6,4 +6,6 @@ public interface S3Service {
     byte[] getObject(String key);
 
     void deleteObject(String key);
+
+    byte[] getBookCover(String fileKey);
 }

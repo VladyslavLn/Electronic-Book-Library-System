@@ -75,12 +75,6 @@ public class BooksController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{bookId}/file/upload")
-    public ResponseEntity<String> uploadBook(@PathVariable("bookId") Integer bookId, @RequestPart MultipartFile file) {
-        bookService.uploadBookFile(bookId, file);
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/{bookId}/file/download")
     public ResponseEntity<Resource> downloadBook(@PathVariable("bookId") Integer bookId) {
         BookFileMetadata data = bookService.downloadBookFile(bookId);
